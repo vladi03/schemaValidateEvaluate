@@ -1,7 +1,8 @@
 const assert = require("assert");
-const {validateField} = require("../uiValidate");
+const {validateField, convertToValidationState} = require("../uiValidate");
 // noinspection JSUnusedLocalSymbols
-const {roleGood, roleBadFeature, roleMissingName, roleMinLength} = require("../mocks/mockPermissions");
+const {roleGood, roleBadFeature, roleMissingName, roleMinLength,
+    roleAllWrong} = require("../mocks/mockPermissions");
 describe("ui validation without prev state", ()=> {
     it("bad Roles Name, target name", ()=> {
         const result = validateField(roleMinLength, "name", "role");
@@ -12,6 +13,16 @@ describe("ui validation without prev state", ()=> {
     it("bad Roles Name, target different", ()=> {
         const result = validateField(roleMinLength, "desc", "role");
         assert.deepStrictEqual(result, {"desc": ""}, "no results");
+    });
+
+    it("bad Roles Name, target different", ()=> {
+        const result = validateField(roleBadFeature, "features", "role");
+        assert.deepStrictEqual(result, {"features": "should have required property 'id'"}, "no results");
+    });
+
+    it("many bad in Role", () => {
+        const result = validateField(roleAllWrong, "name", "role");
+        assert.deepStrictEqual(result, {"name": "required"}, "complex");
     });
 });
 
@@ -50,3 +61,17 @@ describe("role Good", ()=> {
     });
 });
 
+//roleAllWrong
+//convertToValidationState
+
+describe("role validation state", ()=> {
+    it("many bad in Role", () => {
+        const result = convertToValidationState(roleAllWrong, "role");
+        assert.deepStrictEqual(result, {"name": "required"}, "complex");
+    });
+
+    it("undefined object in Role", () => {
+        const result = convertToValidationState(undefined, "role");
+        assert.deepStrictEqual(result, {"summary": "should be object"}, "complex");
+    });
+});

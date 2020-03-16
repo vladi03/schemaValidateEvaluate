@@ -46,6 +46,24 @@ const roleMissingName= {
     ]
 };
 
+const roleAllWrong= {
+    "_id" : "5e557f90775274263362197a",
+    "desc" : "Re",
+    "features" : [
+        {
+            "_id" : 1,
+            "name" : "ReadIdClients",
+            "desc" : "Read Identity Server Clients"
+        },
+        {
+            "_id" : 3,
+            "id": 4,
+            "name" : "re",
+            "desc" : "Read UI Users"
+        }
+    ]
+};
+
 const roleBadFeature = {
     "_id" : "5e557f90775274263362197a",
     "name" : "ReadOnly",
@@ -91,4 +109,4 @@ const featureBadId= {
 };
 
 module.exports = {roleGood, roleBadFeature, roleNoFeatures, roleMissingName,
-    roleMinLength, featureGood, featureBadName, featureBadId};
+    roleMinLength, roleAllWrong, featureGood, featureBadName, featureBadId};
