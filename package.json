@@ -1,0 +1,23 @@
+{
+  "name": "schemavalidateevaluate",
+  "version": "0.1.0",
+  "description": "Evaluate different schema validate packages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vladi03/schemaValidateEvaluate.git"
+  },
+  "keywords": [
+    "json",
+    "schema"
+  ],
+  "author": "Vlad Martinez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vladi03/schemaValidateEvaluate/issues"
+  },
+  "homepage": "https://github.com/vladi03/schemaValidateEvaluate#readme"
+}
