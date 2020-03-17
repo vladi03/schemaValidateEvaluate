@@ -1,45 +1,60 @@
 const Ajv = require('ajv');
-const { roleSchema, featureSchema } = require("./schemas/permissionSchemas");
-
+const { roleSchema,
+    featureSchema } = require("./schemas/permissionSchemas");
+const userSchema = require("./schemas/userSchema");
 const schemaValidator = new Ajv();
 schemaValidator.addSchema(roleSchema, "role");
 schemaValidator.addSchema(featureSchema, "feature");
+schemaValidator.addSchema(userSchema, "user");
 
 const validateField = (target, targetFieldName, schemaName, previousState) => {
-    let result = {[targetFieldName] : ""};
-    const passes = schemaValidator.validate(schemaName, target);
-    if(!passes) {
-        const errors = schemaValidator.errors;
-        errors.forEach((error) => {
-            const errorPath = error.schemaPath.split("/");
-            if(errorPath.length > 3 && errorPath[2] === targetFieldName)
-                result[targetFieldName] = error.message;
-            else if(error["params"]["missingProperty"] === targetFieldName)
-                result[error["params"]["missingProperty"]] = error.keyword;
-        });
+    const result = schemaValidator.validate(schemaName, target) ?
+        {[targetFieldName] : undefined} : errorToValidation(schemaValidator.errors, false, targetFieldName);
+    if(result[targetFieldName]) {
+        return {...previousState, ...result};
+    } else {
+        // noinspection JSUnusedLocalSymbols
+        const {[targetFieldName]: _, ...newResult} = {...previousState, ...result};
+        return newResult;
     }
 
-    if(previousState)
-        result = {...previousState, ...result};
-
-    return result;
 };
 
 const convertToValidationState = (target, schemaName) => {
-    const passes = schemaValidator.validate(schemaName, target);
-    const errors = schemaValidator.errors;
+    return schemaValidator.validate(schemaName, target) ?
+        {} : errorToValidation(schemaValidator.errors, true);
+};
+
+const errorToValidation = (errors, includeSummary, onlyfield) => {
     const result = {};
-    if(!passes && errors)
+    if(errors && errors.length > 0) {
         errors.forEach((error) => {
-            const errorPath = error.schemaPath.split("/");
-            if(errorPath.length > 3 )
-                result[errorPath[2]] = error.message;
-            else if(error["params"]["missingProperty"])
-                result[error["params"]["missingProperty"]] = error.keyword;
+            let fieldName = findPropertyFromPath(error.schemaPath) ||
+                error["params"]["missingProperty"] || "summary";
+
+            if(onlyfield) {
+                if (onlyfield === fieldName)
+                    result[onlyfield] = {keyWord: error.keyword, message: error.message};
+                else
+                    result[onlyfield] = undefined;
+            }
             else
-                result["summary"] = error.message;
+                result[fieldName] = {keyWord: error.keyword, message: error.message};
+
+            if(includeSummary && fieldName !== "summary")
+                result.summary = {keyWord: error.keyword, message: `${fieldName} ${error.message}` };
         });
+    }
     return result
 };
 
-module.exports = {validateField, convertToValidationState};
+const findPropertyFromPath = (path) => {
+    const re = /\/properties\/([a-zA-Z0-9]*)\//;
+    const result = path.match(re);
+    if(result && result.length > 1)
+        return result[1];
+    else return false;
+};
+
+
+module.exports = {validateField, convertToValidationState, findPropertyFromPath};
