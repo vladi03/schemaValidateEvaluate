@@ -100,13 +100,21 @@ describe("role/user validation state", ()=> {
     it("many bad in Role", () => {
         const result = convertToValidationState(roleAllWrong, "role");
         const expected = {
+            "desc": {
+                "keyWord": "minLength",
+                "message": "should NOT be shorter than 3 characters"
+            },
+            "features": {
+                "keyWord": "minLength",
+                "message": "should NOT be shorter than 3 characters"
+            },
             "name": {
                 "keyWord": "required",
                 "message": "should have required property 'name'"
             },
             "summary": {
-                "keyWord": "required",
-                "message": "name should have required property 'name'"
+                "keyWord": "minLength",
+                "message": "features should NOT be shorter than 3 characters"
             }
         };
         assert.deepStrictEqual(result, expected, "complex");

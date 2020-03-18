@@ -2,14 +2,14 @@ const Ajv = require('ajv');
 const { roleSchema,
     featureSchema } = require("./schemas/permissionSchemas");
 const userSchema = require("./schemas/userSchema");
-const schemaValidator = new Ajv();
+const schemaValidator = new Ajv({allErrors: true});
 schemaValidator.addSchema(roleSchema, "role");
 schemaValidator.addSchema(featureSchema, "feature");
 schemaValidator.addSchema(userSchema, "user");
 
 const validateField = (target, targetFieldName, schemaName, previousState) => {
     const result = schemaValidator.validate(schemaName, target) ?
-        {[targetFieldName] : undefined} : errorToValidation(schemaValidator.errors, false, targetFieldName);
+        {[targetFieldName] : undefined} : errorToValidationState(schemaValidator.errors, false, targetFieldName);
     if(result[targetFieldName]) {
         return {...previousState, ...result};
     } else {
@@ -22,10 +22,10 @@ const validateField = (target, targetFieldName, schemaName, previousState) => {
 
 const convertToValidationState = (target, schemaName) => {
     return schemaValidator.validate(schemaName, target) ?
-        {} : errorToValidation(schemaValidator.errors, true);
+        {} : errorToValidationState(schemaValidator.errors, true);
 };
 
-const errorToValidation = (errors, includeSummary, onlyfield) => {
+const errorToValidationState = (errors, includeSummary, onlyfield) => {
     const result = {};
     if(errors && errors.length > 0) {
         errors.forEach((error) => {
@@ -35,8 +35,6 @@ const errorToValidation = (errors, includeSummary, onlyfield) => {
             if(onlyfield) {
                 if (onlyfield === fieldName)
                     result[onlyfield] = {keyWord: error.keyword, message: error.message};
-                else
-                    result[onlyfield] = undefined;
             }
             else
                 result[fieldName] = {keyWord: error.keyword, message: error.message};
@@ -57,4 +55,5 @@ const findPropertyFromPath = (path) => {
 };
 
 
-module.exports = {validateField, convertToValidationState, findPropertyFromPath};
+module.exports = {validateField, convertToValidationState, findPropertyFromPath,
+    errorToValidationState};
